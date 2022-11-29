@@ -14,6 +14,9 @@ p <- function(x) {par(mfrow = c(x[1], x[2]))}
 
 # Import Data
 churnData <- read.csv("Case4.csv", stringsAsFactors = T)
+churnData$Surname <- NULL
+churnData$RowNumber <- NULL
+    #These are is not predictive.
 
 # Inspect Structure
 str(churnData)
