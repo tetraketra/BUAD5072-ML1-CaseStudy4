@@ -112,18 +112,12 @@ test_trans  <- preprocessing |> predict(test)
 
 # Part 2d, LDA --------------------------------------------------------------------------------
 library(MASS)
-#library(dplyr)
 
 model_lda <- lda(Exited~.,data = train_trans) ## train model with training set
 model_lda
 
-predictions<-model_lda %>% predict(test_trans) ##predictions
-confusionMatrix(predictions$class,test_trans$Exited) ### accuracy is .8364
-
-
-#library(ggplot2)
-#ldaforgraph <- cbind(train_trans, predict(model_lda)$x)
-
+predictions <- model_lda |> predict(test_trans)
+confusionMatrix(data = predictions$class, reference = test_trans$Exited, positive = "1") ### accuracy is .8364
 
 
 
