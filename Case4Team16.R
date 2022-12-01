@@ -99,9 +99,8 @@ test  <- churnData[-divideData,]
 
 
 # Part 2b, Big Logistic --------------------------------------------------------------------------------
-#TODO ON BigLogistic BRANCH!
 
-
+# Model Selection
 logisticmodel <- glm(Exited ~ ., family = binomial, data = train)
 summary(logisticmodel)
 
@@ -129,69 +128,63 @@ summary(logisticmodel7)
 logisticmodel <- logisticmodel7
 
 summary(logisticmodel)
-# I decided on this model with these variables because I took out the ones that were not significant, and some of the variables in this model are not significant like GeographySpain, but since GeographyGermany is significant, GeographySpain must stay, same with NumOfProducts4.
+    #I decided on this model with these variables because I took out the ones that were not significant.
+    #Some of the variables in this model are not significant like GeographySpain,
+    #but since GeographyGermany is significant, GeographySpain must stay.
+    #(Same with NumOfProducts4.)
 
+
+# Assumption 1: Linear Logit
 logit <- logisticmodel$linear.predictors
 plot(logit, train$Age)
-# Can only check for numeric predictors, so we can only check for Age.
-#We see two distinct and parallel lines.
-#The logit is linear.
+
 
 # Assumption 2: No Multicolinearity
 car::vif(logisticmodel)
-#Nothing even close to 5 or 10.
-#No multicolinearity.
+    #Nothing even close to 5 or 10.
+    #No multicolinearity.
 
 # Assumption 3: No Influential Outliers
 plot(logisticmodel, which = 4); abline(h = 4/nrow(churnData), col = "red")
-#There seem to be many points that are far from the median, but I do not see a reason to extract any.
+    #There seem to be many points that are far from the median,
+    #but we do not see a reason to extract any after seeing the effect previously.
 cooks.distance(logisticmodel) |> sort(decreasing = T) |> head(10)
-# A large portion of our data is above Cook's D cutoff of 4/N, threshold, but no outliers that are way above any other points
-#Cook's distance is inversely scaled by the number of predictors.
-#The visual inspection shows there are many points that are far above the typical point.
+    #A large portion of our data is above Cook's D cutoff of 4/N, but no outliers seem extraordinary.
+    #It is more accurate to say that the data has a wide spread, not that it has many outliers.
+    #We should check, just to be sure.
 
 coefs_base <- coef(logisticmodel)
-
 outliers <- cooks.distance(logisticmodel) |> sort(decreasing = T) |> head(4) |> names() |> as.numeric()
 subset <- train[-outliers,]
-
 coefs_new <- coef(glm(Exited ~ Geography + Gender + Age + NumOfProducts + IsActiveMember, family = binomial, data = subset))
-
 rbind(coefs_base, coefs_new)
-#The effect is very minor.
-#We believe there are no strongly influential outliers.
+    #The effect is very minor.
+    #We believe there are no strongly influential outliers.
 
 # Assumption 4: Independence of Errors
 plot(logisticmodel, which = 1)
-#We once again have our two clear groups.
-#We see a slight negative relationship.
-#We believe errors are not fully independent.
+    #We once again have our two clear groups.
+    #We see an odd shape, but no overall directional relationship.
+    #We believe errors are independent.
 
-####################### ************* #################
-
-#Provide the accuracy rates of the validation set for each test conducted above.
-#• For each model listed above, provide a summary in comments interpreting the confusion matrix/table object regarding True Positives, True Negatives, False Positives, and False Negatives, specificity and sensitivity.
-
+# Model Metrics
 probs<-predict(logisticmodel, test, type="response")
 head(probs)
 pred<-ifelse(probs>.5, 1,0)|> as.factor()
 head(pred)
 
 mean(pred!=test$Exited)
-mean(pred==test$Exited) 
+mean(pred==test$Exited)
 
 class(pred);class(test$type)
-confusionMatrix(pred,test$Exited,positive="1") 
+confusionMatrix(pred,test$Exited,positive="1")
 
-# Sensitivity = 0.34644
-# This is the true positive rate and it is not very high
+#Sensitivity = 0.34644 #This is the true positive rate and it is not very high
+#Specificity = 0.96294 #This is the true negative rate and it is very high, so our model is very good at predicting who will stay.
+    #This, however, is not the event of interest. Having a high sensitivity is more important and useful, but it is interesting that our model is good at predicting who will stay.
+#There are 141 True Positives, 1533 True Negatives, 266 False Negatives, and 59 False Positives
 
-#Specificity = 0.96294
-# This is the true negative rate and it is very high, so our model is very good at predicting who will stay, not churn. This is not the event, the churn is the event and what we are most interested in. Having a high sensitivity is more important and useful, but it is interesting that our model is good at predicting who will stay.
-
-# There are 141 True Positives, 1533 True Negatives, 266 False Negatives, and 59 False Positives
-
-# Overall, the model is not great at predicting who will churn, but it is very good at predicting who will stay. While this may be useful, it was not the purpose of the model
+#Overall, the model is not great at predicting who will churn, but it is very good at predicting who will stay. While this may be useful, it was not the purpose of the model
 
 
 # Part 2c, Center and Scale --------------------------------------------------------------------------------
