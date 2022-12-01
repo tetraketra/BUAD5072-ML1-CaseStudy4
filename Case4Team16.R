@@ -187,7 +187,7 @@ mean(pred!=test$Exited)
 mean(pred==test$Exited)
 
 class(pred);class(test$type)
-confusionMatrix(pred,test$Exited,positive="1")
+confusionMatrix(data = pred, reference = test$Exited, positive="1")
     #Sensitivity = 0.34644
         #This is the true positive rate and it is not very high
     #Specificity = 0.96294
