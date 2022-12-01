@@ -118,12 +118,11 @@ model_lda <- lda(Exited~.,data = train_trans) ## train model with training set
 model_lda
 
 predictions<-model_lda %>% predict(test_trans) ##predictions
-mean(predictions$class==test_trans$Exited) ### accuracy is .8364
-table(predictions$class,test_trans$Exited)
-head(predictions$class)
+confusionMatrix(predictions$class,test_trans$Exited) ### accuracy is .8364
 
-library(ggplot2)
-ldaforgraph <- cbind(train_trans, predict(model_lda)$x)
+
+#library(ggplot2)
+#ldaforgraph <- cbind(train_trans, predict(model_lda)$x)
 
 
 
