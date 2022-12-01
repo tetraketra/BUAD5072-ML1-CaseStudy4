@@ -103,6 +103,7 @@ test  <- churnData[-divideData,]
 
 
 # Part 2c, Center and Scale --------------------------------------------------------------------------------
+library(caret)
 preprocessing <- train |> preProcess(method=c("center","scale"))
 train_trans <- preprocessing |> predict(train)
 test_trans  <- preprocessing |> predict(test)
@@ -110,7 +111,20 @@ test_trans  <- preprocessing |> predict(test)
 
 
 # Part 2d, LDA --------------------------------------------------------------------------------
-#TODO ON LDA BRANCH!
+library(MASS)
+#library(dplyr)
+
+model_lda <- lda(Exited~.,data = train_trans) ## train model with training set
+model_lda
+
+predictions<-model_lda %>% predict(test_trans) ##predictions
+mean(predictions$class==test_trans$Exited) ### accuracy is .8364
+table(predictions$class,test_trans$Exited)
+head(predictions$class)
+
+library(ggplot2)
+ldaforgraph <- cbind(train_trans, predict(model_lda)$x)
+
 
 
 
