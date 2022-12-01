@@ -1,6 +1,6 @@
 # Team 16 -----------------------------------------------------------------------------------------
- # Ben S
- # Smita D
+ # Ben    S
+ # Smita  D
  # Jiacan L
  # Andrew L
  # Jeffri B
@@ -14,7 +14,7 @@ p <- function(x) {par(mfrow = c(x[1], x[2]))}
 
 # Import Data
 churnData <- read.csv("Case4.csv", stringsAsFactors = T)
-churnData$Surname <- NULL
+churnData$Surname   <- NULL
 churnData$RowNumber <- NULL
     #These are is not predictive.
 
@@ -43,6 +43,8 @@ summary(churnData)
 
 
 # Part 1, Small Logistic --------------------------------------------------------------------------------
+
+# Model Training
 shortlogmodel <- glm(Exited ~ Age + Gender, family = binomial, data = churnData)
 summary(shortlogmodel)
     #All variables are significant.
@@ -86,6 +88,18 @@ plot(shortlogmodel, which = 1)
     #We once again have our two clear groups, one for each gender in the dataset.
     #We see a slight negative relationship.
     #We believe errors are not fully independent.
+
+# Interpretation
+summary(shortlogmodel)
+    #The effects of Age and Gender on the logged odds of churning are:
+        #Each year of age       = +0.0631
+        #Being male             = -0.5370
+        #Intercept purposefully absent. Read on.
+    #These variables do not capture the effect of having a non-modal gender.
+    #The leftmost point that is reasonably considerable is not the intercept, but Age = 18.
+        #At 18, female employees have a 7.40% probability of churning.
+        #At 18, male employees have a 4.46% probability of churning.
+        #Both only go up with age.
 
 
 
