@@ -10,6 +10,7 @@
 # Part 0, Setup -----------------------------------------------------------------------------------
 rm(list=ls()); options(scipen=999)
 if (!require("tidyverse")) {install.packages("tidyverse"); library(tidyverse)}
+if (!require("caret")) {install.packages("caret"); library(caret)}
 p <- function(x) {par(mfrow = c(x[1], x[2]))}
 
 # Import Data
@@ -112,8 +113,92 @@ test  <- churnData[-divideData,]
 
 
 # Part 2b, Big Logistic --------------------------------------------------------------------------------
-#TODO ON BigLogistic BRANCH!
 
+# Model Selection
+logisticmodel <- glm(Exited ~ ., family = binomial, data = train)
+summary(logisticmodel)
+
+logisticmodel1 <- glm(Exited ~ CreditScore + Geography + Gender + Age + Tenure + Balance + NumOfProducts + HasCrCard + IsActiveMember + EstimatedSalary + Tenure_FACTOR, family = binomial, data = train)
+summary(logisticmodel1)
+
+logisticmodel2 <- glm(Exited ~ CreditScore + Geography + Gender + Age + Tenure + NumOfProducts + HasCrCard + IsActiveMember + EstimatedSalary + Tenure_FACTOR, family = binomial, data = train)
+summary(logisticmodel2)
+
+logisticmodel3 <- glm(Exited ~ CreditScore + Geography + Gender + Age + Tenure + NumOfProducts + HasCrCard + IsActiveMember + Tenure_FACTOR, family = binomial, data = train)
+summary(logisticmodel3)
+
+logisticmodel4 <- glm(Exited ~  Geography + Gender + Age + Tenure + NumOfProducts + HasCrCard + IsActiveMember + Tenure_FACTOR, family = binomial, data = train)
+summary(logisticmodel4)
+
+logisticmodel5 <- glm(Exited ~  Geography + Gender + Age + NumOfProducts + HasCrCard + IsActiveMember + Tenure_FACTOR, family = binomial, data = train)
+summary(logisticmodel5)
+
+logisticmodel6 <- glm(Exited ~  Geography + Gender + Age + NumOfProducts + IsActiveMember + Tenure_FACTOR, family = binomial, data = train)
+summary(logisticmodel6)
+
+logisticmodel7<- glm(Exited ~  Geography + Gender + Age + NumOfProducts + IsActiveMember , family = binomial, data = train)
+summary(logisticmodel7)
+
+logisticmodel <- logisticmodel7
+
+summary(logisticmodel)
+    #I decided on this model with these variables because I took out the ones that were not significant.
+    #Some of the variables in this model are not significant like GeographySpain,
+    #but since GeographyGermany is significant, GeographySpain must stay.
+    #(Same with NumOfProducts4.)
+
+
+# Assumption 1: Linear Logit
+logit <- logisticmodel$linear.predictors
+plot(logit, train$Age)
+
+
+# Assumption 2: No Multicolinearity
+car::vif(logisticmodel)
+    #Nothing even close to 5 or 10.
+    #No multicolinearity.
+
+# Assumption 3: No Influential Outliers
+plot(logisticmodel, which = 4); abline(h = 4/nrow(churnData), col = "red")
+    #There seem to be many points that are far from the median,
+    #but we do not see a reason to extract any after seeing the effect previously.
+cooks.distance(logisticmodel) |> sort(decreasing = T) |> head(10)
+    #A large portion of our data is above Cook's D cutoff of 4/N, but no outliers seem extraordinary.
+    #It is more accurate to say that the data has a wide spread, not that it has many outliers.
+    #We should check, just to be sure.
+
+coefs_base <- coef(logisticmodel)
+outliers <- cooks.distance(logisticmodel) |> sort(decreasing = T) |> head(4) |> names() |> as.numeric()
+subset <- train[-outliers,]
+coefs_new <- coef(glm(Exited ~ Geography + Gender + Age + NumOfProducts + IsActiveMember, family = binomial, data = subset))
+rbind(coefs_base, coefs_new)
+    #The effect is very minor.
+    #We believe there are no strongly influential outliers.
+
+# Assumption 4: Independence of Errors
+plot(logisticmodel, which = 1)
+    #We once again have our two clear groups.
+    #We see an odd shape, but no overall directional relationship.
+    #We believe errors are independent.
+
+# Model Metrics
+probs<-predict(logisticmodel, test, type="response")
+head(probs)
+pred<-ifelse(probs>.5, 1,0)|> as.factor()
+head(pred)
+
+mean(pred!=test$Exited)
+mean(pred==test$Exited)
+
+class(pred);class(test$type)
+confusionMatrix(pred,test$Exited,positive="1")
+
+#Sensitivity = 0.34644 #This is the true positive rate and it is not very high
+#Specificity = 0.96294 #This is the true negative rate and it is very high, so our model is very good at predicting who will stay.
+    #This, however, is not the event of interest. Having a high sensitivity is more important and useful, but it is interesting that our model is good at predicting who will stay.
+#There are 141 True Positives, 1533 True Negatives, 266 False Negatives, and 59 False Positives
+
+#Overall, the model is not great at predicting who will churn, but it is very good at predicting who will stay. While this may be useful, it was not the purpose of the model
 
 
 # Part 2c, Center and Scale --------------------------------------------------------------------------------
