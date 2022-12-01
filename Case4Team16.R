@@ -10,7 +10,8 @@
 # Part 0, Setup -----------------------------------------------------------------------------------
 rm(list=ls()); options(scipen=999)
 if (!require("tidyverse")) {install.packages("tidyverse"); library(tidyverse)}
-if (!require("caret")) {install.packages("caret"); library(caret)}
+if (!require("caret"))     {install.packages("caret");     library(caret)}
+if (!require("MASS"))      {install.packages("MASS");      library(caret)}
 p <- function(x) {par(mfrow = c(x[1], x[2]))}
 
 # Import Data
@@ -74,12 +75,9 @@ cooks.distance(shortlogmodel) |> sort(decreasing = T) |> head(4)
         #We can compare our coefficients with and without these points.
 
 coefs_base <- coef(shortlogmodel)
-
 outliers <- cooks.distance(shortlogmodel) |> sort(decreasing = T) |> head(4) |> names() |> as.numeric()
 subset <- churnData[-outliers,]
-
 coefs_new <- coef(glm(Exited ~ Age + Gender, family = binomial, data = subset))
-
 rbind(coefs_base, coefs_new)
     #The effect is noticeable, but not extreme.
     #We believe there are no strongly influential outliers.
@@ -100,7 +98,7 @@ summary(shortlogmodel)
     #The leftmost point that is reasonably considerable is not the intercept, but Age = 18.
         #At 18, female employees have a 7.40% probability of churning.
         #At 18, male employees have a 4.46% probability of churning.
-        #Both only go up with age.
+        #Both rates only go up with age.
 
 
 
