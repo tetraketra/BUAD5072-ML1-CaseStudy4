@@ -113,11 +113,20 @@ test_trans  <- preprocessing |> predict(test)
 # Part 2d, LDA --------------------------------------------------------------------------------
 library(MASS)
 
-model_lda <- lda(Exited~.,data = train_trans) ## train model with training set
-model_lda
+ldamodel <- lda(Exited~.,data = train_trans) ## train model with training set
+ldamodel
 
-predictions <- model_lda |> predict(test_trans)
-confusionMatrix(data = predictions$class, reference = test_trans$Exited, positive = "1") ### accuracy is .8364
+predictions <- ldamodel |> predict(test_trans)
+confusionMatrix(data = predictions$class, reference = test_trans$Exited, positive = "1") 
+
+### True Positives:135
+### False Positives:272
+### True Negatives:1537
+### False Negatives:55
+### A total of 1672 samples were correctly predicted out of the total 1999 samples. Thus, the overall accuracy is 83.64%.
+### The sensitivity comes from 135/(272+135), equals to 33.17%, indicating that it is not a very good performer.
+### The specificity comes from 1537/(1537+55), equals to 96.55%
+
 
 
 
