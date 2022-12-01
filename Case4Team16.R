@@ -147,11 +147,9 @@ summary(logisticmodel)
     #but since GeographyGermany is significant, GeographySpain must stay.
     #(Same with NumOfProducts4.)
 
-
 # Assumption 1: Linear Logit
 logit <- logisticmodel$linear.predictors
 plot(logit, train$Age)
-
 
 # Assumption 2: No Multicolinearity
 car::vif(logisticmodel)
@@ -192,13 +190,12 @@ mean(pred==test$Exited)
 
 class(pred);class(test$type)
 confusionMatrix(pred,test$Exited,positive="1")
+    #Sensitivity = 0.34644 #This is the true positive rate and it is not very high
+    #Specificity = 0.96294 #This is the true negative rate and it is very high, so our model is very good at predicting who will stay.
+        #This, however, is not the event of interest. Having a high sensitivity is more important and useful, but it is interesting that our model is good at predicting who will stay.
+    #There are 141 True Positives, 1533 True Negatives, 266 False Negatives, and 59 False Positives
 
-#Sensitivity = 0.34644 #This is the true positive rate and it is not very high
-#Specificity = 0.96294 #This is the true negative rate and it is very high, so our model is very good at predicting who will stay.
-    #This, however, is not the event of interest. Having a high sensitivity is more important and useful, but it is interesting that our model is good at predicting who will stay.
-#There are 141 True Positives, 1533 True Negatives, 266 False Negatives, and 59 False Positives
-
-#Overall, the model is not great at predicting who will churn, but it is very good at predicting who will stay. While this may be useful, it was not the purpose of the model
+    #Overall, the model is not great at predicting who will churn, but it is very good at predicting who will stay. While this may be useful, it was not the purpose of the model
 
 
 # Part 2c, Center and Scale --------------------------------------------------------------------------------
