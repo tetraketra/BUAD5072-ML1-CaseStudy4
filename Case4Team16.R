@@ -10,6 +10,7 @@
 # Part 0, Setup -----------------------------------------------------------------------------------
 rm(list=ls()); options(scipen=999)
 if (!require("tidyverse")) {install.packages("tidyverse"); library(tidyverse)}
+if (!require("caret")) {install.packages("caret"); library(tidyverse)}
 p <- function(x) {par(mfrow = c(x[1], x[2]))}
 
 # Import Data
@@ -117,13 +118,18 @@ test_trans  <- preprocessing |> predict(test)
 # Part 2e, QDA --------------------------------------------------------------------------------
 #TODO ON QDA BRANCH!
 #QDA assumes that each class has its own covariance matrix - much more flexible approach - improved accuracy
-qdamodel<- qda(Exited~., data=train_trans)
+library(caret)
+qdamodel <- MASS::qda(Exited ~ . - Tenure, data=train_trans)
+    #This does not run with NumOfProducts included!
+    #There is insufficient data in its levels to separate the y classes.
+qdamodel <- MASS::qda(Exited ~ . - Tenure - NumOfProducts, data=train_trans)
+
 qdamodel
 #MAKING PREDICTIONS
 predictions<-qdamodel %>% predict(test_trans)
 names(predictions)
-#Checking accuracy 
-mean(predictions$class==test_trans$Exited) 
+#Checking accuracy
+mean(predictions$class==test_trans$Exited)
 table(predictions$class,test_trans$Exited)
 
 
