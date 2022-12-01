@@ -104,7 +104,7 @@ summary(shortlogmodel)
 
 
 
-# Part 2a, Data Split --------------------------------------------------------------------------------
+# Part 2a, Data Split ----------------------------------------------------------------------------------
 set.seed(1325029) #hexatridecimal "seed" converted to decimal
 divideData <- caret::createDataPartition(churnData$Exited, p=.8, list=FALSE)
 train <- churnData[ divideData,]
@@ -143,7 +143,7 @@ logisticmodel <- logisticmodel7
 
 summary(logisticmodel)
     #I decided on this model with these variables because I took out the ones that were not significant.
-    #Some of the variables in this model are not significant like GeographySpain,
+    #Some of the variables in this model are not significant like GeographySpain, ...
     #but since GeographyGermany is significant, GeographySpain must stay.
     #(Same with NumOfProducts4.)
 
@@ -158,7 +158,7 @@ car::vif(logisticmodel)
 
 # Assumption 3: No Influential Outliers
 plot(logisticmodel, which = 4); abline(h = 4/nrow(churnData), col = "red")
-    #There seem to be many points that are far from the median,
+    #There seem to be many points that are far from the median, ...
     #but we do not see a reason to extract any after seeing the effect previously.
 cooks.distance(logisticmodel) |> sort(decreasing = T) |> head(10)
     #A large portion of our data is above Cook's D cutoff of 4/N, but no outliers seem extraordinary.
@@ -190,15 +190,20 @@ mean(pred==test$Exited)
 
 class(pred);class(test$type)
 confusionMatrix(pred,test$Exited,positive="1")
-    #Sensitivity = 0.34644 #This is the true positive rate and it is not very high
-    #Specificity = 0.96294 #This is the true negative rate and it is very high, so our model is very good at predicting who will stay.
-        #This, however, is not the event of interest. Having a high sensitivity is more important and useful, but it is interesting that our model is good at predicting who will stay.
+    #Sensitivity = 0.34644
+        #This is the true positive rate and it is not very high
+    #Specificity = 0.96294
+        #This is the true negative rate and it is very high, ...
+        #so our model is very good at predicting who will stay.
+        #This, however, is not the event of interest. Having a high sensitivity is more important and useful, ...
+        #but it is interesting that our model is good at predicting who will stay.
     #There are 141 True Positives, 1533 True Negatives, 266 False Negatives, and 59 False Positives
+    #Overall, the model is not great at predicting who will churn, ...
+    #but it is very good at predicting who will stay.
+    #While this may be useful, it was not the purpose of the model
 
-    #Overall, the model is not great at predicting who will churn, but it is very good at predicting who will stay. While this may be useful, it was not the purpose of the model
 
-
-# Part 2c, Center and Scale --------------------------------------------------------------------------------
+# Part 2c, Center and Scale -------------------------------------------------------------------
 preprocessing <- train |> preProcess(method=c("center","scale"))
 train_trans <- preprocessing |> predict(train)
 test_trans  <- preprocessing |> predict(test)
