@@ -121,13 +121,26 @@ test_trans  <- preprocessing |> predict(test)
 
 
 # Part 2f, KNN --------------------------------------------------------------------------------
-knnfit <- train(Exited ~ Age + Gender, data = train_trans, method="knn", preProcess=(c("center","scale")))
+knnfit <- train(Exited ~ Age + Gender, data = train_trans,
+                method="knn", preProcess=(c("center","scale")))
 
 knnmodel <- predict(knnfit, newdata=test_trans)
 
 confusionMatrix(knnmodel,test_trans$Exited)
-mean(knnmodel==test_trans$Exited)
+# The sensitivity is 0.9485, this means that 
+# the model is very often right about predicting
+# who will exit by examining the relationship
+# between exiting with age and gender.
 
+# The specificity is 0.2236, this means that
+# the model isn't right about falsely predicting
+# an exit in someone based off of age and gender
+# very often.
+
+mean(knnmodel==test_trans$Exited)
+# When comparing the results of the KNN model to
+# what happened in the actual data, the accuracy 
+# of this model is 0.8009.
 
 # Part 2g, Model Selection --------------------------------------------------------------------------------
 #TODO ON MAIN BRANCH!
