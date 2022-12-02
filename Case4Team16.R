@@ -10,6 +10,7 @@
 # Part 0, Setup -----------------------------------------------------------------------------------
 rm(list=ls()); options(scipen=999)
 if (!require("tidyverse")) {install.packages("tidyverse"); library(tidyverse)}
+if (!require("caret")) {install.packages("caret"); library(caret)}
 p <- function(x) {par(mfrow = c(x[1], x[2]))}
 
 # Import Data
@@ -120,8 +121,12 @@ test_trans  <- preprocessing |> predict(test)
 
 
 # Part 2f, KNN --------------------------------------------------------------------------------
-#TODO ON KNN BRANCH!
+knnfit <- (Exited ~ Age + Gender, data = train_trans, method="knn", preProcess=(c("center","scale")))
 
+knnmodel <- predict(knnfit, newdata=test_trans)
+
+confusionMatrix(knnmodel,test_trans$Exited)
+mean(knnmodel==test_trans$Exited)
 
 
 # Part 2g, Model Selection --------------------------------------------------------------------------------
