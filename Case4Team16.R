@@ -133,7 +133,7 @@ mean(predictions$class==test_trans$Exited)
 table(predictions$class,test_trans$Exited)
 #Confusion matrix
 predictions$class <- as.factor(predictions$class)
-confusionMatrix(predictions$class, test_trans$Exited, positive = "1")
+caret::confusionMatrix(predictions$class, test_trans$Exited, positive = "1")
 #Accuracy is 0.81
 
 
