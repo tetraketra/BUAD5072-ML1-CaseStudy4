@@ -119,6 +119,10 @@ test_trans  <- preprocessing |> predict(test)
 #TODO ON QDA BRANCH!
 #QDA assumes that each class has its own covariance matrix - much more flexible approach - improved accuracy
 library(caret)
+#<<<<<<< Updated upstream
+#=======
+library(MASS)
+#>>>>>>> Stashed changes
 try(qdamodel <- MASS::qda(Exited ~ . - Tenure, data=train_trans))
     #This does not run with NumOfProducts included!
     #There is insufficient data in its levels to separate the y classes.
