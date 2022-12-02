@@ -139,7 +139,11 @@ table(predictions$class,test_trans$Exited)
 predictions$class <- as.factor(predictions$class)
 caret::confusionMatrix(predictions$class, test_trans$Exited, positive = "1")
 #Accuracy is 0.81
-
+#Overall accuracy of the model is 83%
+#the sentivity analysis rate stands at 28% which means the model will not perform well 
+#the specificity analysis rate stands at 95% 
+#True negatives 1517 # false negatives 291
+#false positives 75 #true positives 116
 
 
 
