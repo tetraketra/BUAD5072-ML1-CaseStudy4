@@ -121,7 +121,7 @@ test_trans  <- preprocessing |> predict(test)
 
 
 # Part 2f, KNN --------------------------------------------------------------------------------
-knnfit <- (Exited ~ Age + Gender, data = train_trans, method="knn", preProcess=(c("center","scale")))
+knnfit <- train(Exited ~ Age + Gender, data = train_trans, method="knn", preProcess=(c("center","scale")))
 
 knnmodel <- predict(knnfit, newdata=test_trans)
 
