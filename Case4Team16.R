@@ -101,6 +101,32 @@ summary(shortlogmodel)
         #Both rates only go up with age.
 
 
+probs <- predict(shortlogmodel, test, type="response")
+head(probs)
+pred <- ifelse(probs>.5, 1,0)|> as.factor()
+head(pred)
+
+mean(pred!=test$Exited)
+mean(pred==test$Exited)
+
+class(pred);class(test$Exited)
+confusionMatrix(data = pred, reference = test$Exited, positive="1")
+
+     #Sensitivity = 0.04914
+          #This is the true positive rate and it is very low
+     #Specificity = 0.96545
+          #This is the true negative rate and it is very high, ...
+          #so our model is very good at predicting who will stay.
+          #This, however, is not the event of interest. Having a high sensitivity is           more important and useful, ...
+          #but it is interesting that our model is good at predicting who will stay.
+          #There are 20 True Positives, 1537 True Negatives, 387 False Negatives,             and 55 False Positives
+     #Overall, the model is not good at predicting who will churn, ...
+          #but it is very good at predicting who will stay.
+          #While this may be useful, it was not the purpose of the model
+          # The accuracy is .7789
+     #This shortlog model is much worse than the biglogistic model created next.
+
+
 
 # Part 2a, Data Split ----------------------------------------------------------------------------------
 set.seed(1325029) #hexatridecimal "seed" converted to decimal
@@ -280,7 +306,9 @@ confusionMatrix(data = preds, reference = test_trans$Exited, positive = "1")
 
 #Model
 	#Sens   #Spec   #Acc
-#Logistic
+#ShortLogistic
+     #4.91%    #96.55%   #77.89%
+#Big Logistic
 	#34.74%	#96.29%	#83.74%
 #LDA
 	#33.42%	#96.80%	#83.89%
@@ -290,19 +318,19 @@ confusionMatrix(data = preds, reference = test_trans$Exited, positive = "1")
 	#29.48%	#96.42%	#82.79%
 
 #Sorted by Sens, desc.
-    #Logistic, LDA, QDA/KNN
+    #BigLogistic, LDA, QDA/KNN, ShortLog
 #Sorted by Spec, desc.
-    #LDA, KNN, Logistic, QDA
+    #LDA, ShortLog, KNN, BigLogistic, QDA
 #Sorted by Acc, desc.
-    #LDA, Logistic, KNN, QDA
+    #LDA, BigLogistic, KNN, QDA, ShortLog
 
 #This case fundamentally focuses on which employees will churn, our positive cases.
     #Sensitivity best captures true positive classification rate, so it will be our primary selector.
-    #Ranked by sensitivity, Logistic barely beats LDA.
-    #Logistic, however, had the advantage of feature selection to reduce noise.
+    #Ranked by sensitivity, BigLogistic barely beats LDA.
+    #BigLogistic, however, had the advantage of feature selection to reduce noise.
     #This is difficult to perform efficiently for normal LDA, but is possible via Sparse Discriminant Analysis.
         #(à la https://hastie.su.domains/Papers/sda_resubm_daniela-final.pdf)
 
-#For this particular case, we believe Logistic Regression is the best approach.
-    #Logistic and LDA being so closely tied shows that the data is fundamentally linear.
+#For this particular case, we believe BigLogistic Regression is the best approach.
+    #BigLogistic and LDA being so closely tied shows that the data is fundamentally linear.
     #(Both are linear parametric approaches.)
