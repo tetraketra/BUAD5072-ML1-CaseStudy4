@@ -209,7 +209,23 @@ test_trans  <- preprocessing |> predict(test)
 
 
 # Part 2d, LDA --------------------------------------------------------------------------------
-#TODO ON LDA BRANCH!
+
+# Model Training
+ldamodel <- lda(Exited~. - Tenure,data = train_trans)
+    #Performs best with Tenure_FACTOR, not Tenure.
+
+# Predictions
+predictions <- ldamodel |> predict(test_trans)
+confusionMatrix(data = predictions$class, reference = test_trans$Exited, positive = "1")
+    #True Positives:136
+    #False Positives:272
+    #True Negatives:1537
+    #False Negatives:55
+    #Overall accuracy is 83.89%,
+    #The sensitivity comes from 136/(136+271), equals to 33.42%.
+    #The specificity comes from 1541/(1541+51), equals to 96.80%,
+    #This model is not a very good predictor of true positives.
+
 
 
 
