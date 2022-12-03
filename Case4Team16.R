@@ -256,7 +256,20 @@ caret::confusionMatrix(data = predictions$class, reference = test_trans$Exited, 
 
 
 # Part 2f, KNN --------------------------------------------------------------------------------
-#TODO ON KNN BRANCH!
+
+# Model Training
+knnmodel <- train(Exited ~ . - Tenure_FACTOR, data = train_trans, method="knn")
+    #Performs better with Tenure, rather than Tenure_FACTOR.
+
+# Predicitons and Stats
+preds <- predict(knnmodel, newdata=test_trans)
+confusionMatrix(data = preds, reference = test_trans$Exited, positive = "1")
+    #Sensitivity of 29.48%. This model is not a very good predictor of positive cases.
+    #Specifitiy of 96.42%. This model is very good at predicting positive cases, ...
+    #which isn't particularly helpful.
+    #Accuracy of 82.79%.
+    #True positives of 120, false positives 57.
+    #True negatives of 1535, false negatives of 287.
 
 
 
