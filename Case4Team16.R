@@ -215,7 +215,7 @@ test_trans  <- preprocessing |> predict(test)
 ldamodel <- lda(Exited~. - Tenure,data = train_trans)
     #Performs best with Tenure_FACTOR, not Tenure.
 
-# Predictions
+# Predictions & Stats
 predictions <- ldamodel |> predict(test_trans)
 confusionMatrix(data = predictions$class, reference = test_trans$Exited, positive = "1")
     #True Positives:136
