@@ -111,20 +111,22 @@ mean(pred==churnData$Exited)
 
 class(pred);class(churnData$Exited)
 confusionMatrix(data = pred, reference = churnData$Exited, positive="1")
-
-     #Sensitivity = 0.05302
-          #This is the true positive rate and it is very low
-     #Specificity = 0.96396
-          #This is the true negative rate and it is very high, ...
-          #so our model is very good at predicting who will stay.
-          #This, however, is not the event of interest. Having a high sensitivity is           more important and useful, ...
-          #but it is interesting that our model is good at predicting who will stay.
-          #There are 108 True Positives, 7676 True Negatives, 1929 False Negatives,             and 287 False Positives
-     #Overall, the model is not good at predicting who will churn, ...
+    #Sensitivity = 0.05302
+        #This is the true positive rate and it is very low.
+    #Specificity = 0.96396
+        #This is the true negative rate and it is very high, ...
+        #so our model is very good at predicting who will stay.
+        #This, however, is not the event of interest. Having a high sensitivity is more important and useful.
+        #There are 108 True Positives, 7676 True Negatives, 1929 False Negatives, and 287 False Positives
+    #Accuracy = 0.7784
+    #Overall, the model is not good at predicting who will churn, ...
           #but it is very good at predicting who will stay.
           #While this may be useful, it was not the purpose of the model
-          # The accuracy is .7784
-     #This shortlog model is much worse than the biglogistic model created next.
+    #This shortlog model is much worse than the biglogistic model created next.
+    #Because the are fundamentally the same model with different variables, ...
+    #__this model will not be considered in the selection at the bottom of this file.__
+    #Please note that because the data split has not happened yet, this model was already ...
+    #given an advantage by predicting on points it has seen before, yet it still underperformed.
 
 
 
