@@ -137,12 +137,13 @@ summary(logisticmodel6)
 logisticmodel7<- glm(Exited ~  Geography + Gender + Age + NumOfProducts + IsActiveMember , family = binomial, data = train)
 summary(logisticmodel7)
 
+rm(list = c("logisticmodel1", "logisticmodel2", "logisticmodel3", "logisticmodel4", "logisticmodel5", "logisticmodel6"))
 logisticmodel <- logisticmodel7
 
 summary(logisticmodel)
-    #I decided on this model with these variables because I took out the ones that were not significant.
-    #Some of the variables in this model are not significant like GeographySpain, ...
-    #but since GeographyGermany is significant, GeographySpain must stay.
+    #We decided on this model with these variables because we took out the ones that were not significant.
+    #Some dummy variables in this model are not significant, such as GeographySpain, but since
+    #GeographyGermany is significant, the entire Geography variable must stay.
     #(Same with NumOfProducts4.)
 
 # Assumption 1: Linear Logit
@@ -219,9 +220,9 @@ ldamodel <- lda(Exited~. - Tenure,data = train_trans)
 predictions <- ldamodel |> predict(test_trans)
 confusionMatrix(data = predictions$class, reference = test_trans$Exited, positive = "1")
     #True Positives:136
-    #False Positives:272
+    #False Positives:51
     #True Negatives:1537
-    #False Negatives:55
+    #False Negatives:271
     #Overall accuracy is 83.89%,
     #The sensitivity comes from 136/(136+271), equals to 33.42%.
     #The specificity comes from 1541/(1541+51), equals to 96.80%,
