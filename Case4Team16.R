@@ -101,29 +101,29 @@ summary(shortlogmodel)
         #Both rates only go up with age.
 
 
-probs <- predict(shortlogmodel, test, type="response")
+probs <- predict(shortlogmodel, churnData, type="response")
 head(probs)
 pred <- ifelse(probs>.5, 1,0)|> as.factor()
 head(pred)
 
-mean(pred!=test$Exited)
-mean(pred==test$Exited)
+mean(pred!=churnData$Exited)
+mean(pred==churnData$Exited)
 
-class(pred);class(test$Exited)
-confusionMatrix(data = pred, reference = test$Exited, positive="1")
+class(pred);class(churnData$Exited)
+confusionMatrix(data = pred, reference = churnData$Exited, positive="1")
 
-     #Sensitivity = 0.04914
+     #Sensitivity = 0.05302
           #This is the true positive rate and it is very low
-     #Specificity = 0.96545
+     #Specificity = 0.96396
           #This is the true negative rate and it is very high, ...
           #so our model is very good at predicting who will stay.
           #This, however, is not the event of interest. Having a high sensitivity is           more important and useful, ...
           #but it is interesting that our model is good at predicting who will stay.
-          #There are 20 True Positives, 1537 True Negatives, 387 False Negatives,             and 55 False Positives
+          #There are 108 True Positives, 7676 True Negatives, 1929 False Negatives,             and 287 False Positives
      #Overall, the model is not good at predicting who will churn, ...
           #but it is very good at predicting who will stay.
           #While this may be useful, it was not the purpose of the model
-          # The accuracy is .7789
+          # The accuracy is .7784
      #This shortlog model is much worse than the biglogistic model created next.
 
 
@@ -307,7 +307,7 @@ confusionMatrix(data = preds, reference = test_trans$Exited, positive = "1")
 #Model
 	#Sens   #Spec   #Acc
 #ShortLogistic
-     #4.91%    #96.55%   #77.89%
+     #5.30%    #96.40%   #77.84%
 #Big Logistic
 	#34.74%	#96.29%	#83.74%
 #LDA
@@ -320,7 +320,7 @@ confusionMatrix(data = preds, reference = test_trans$Exited, positive = "1")
 #Sorted by Sens, desc.
     #BigLogistic, LDA, QDA/KNN, ShortLog
 #Sorted by Spec, desc.
-    #LDA, ShortLog, KNN, BigLogistic, QDA
+    #LDA, KNN, ShortLog, BigLogistic, QDA
 #Sorted by Acc, desc.
     #LDA, BigLogistic, KNN, QDA, ShortLog
 
