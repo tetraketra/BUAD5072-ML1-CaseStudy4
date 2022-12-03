@@ -178,15 +178,15 @@ plot(logisticmodel, which = 1)
     #We believe errors are independent.
 
 # Model Metrics
-probs<-predict(logisticmodel, test, type="response")
+probs <- predict(logisticmodel, test, type="response")
 head(probs)
-pred<-ifelse(probs>.5, 1,0)|> as.factor()
+pred <- ifelse(probs>.5, 1,0)|> as.factor()
 head(pred)
 
 mean(pred!=test$Exited)
 mean(pred==test$Exited)
 
-class(pred);class(test$type)
+class(pred);class(test$Exited)
 confusionMatrix(data = pred, reference = test$Exited, positive="1")
     #Sensitivity = 0.34644
         #This is the true positive rate and it is not very high
@@ -199,6 +199,7 @@ confusionMatrix(data = pred, reference = test$Exited, positive="1")
     #Overall, the model is not great at predicting who will churn, ...
     #but it is very good at predicting who will stay.
     #While this may be useful, it was not the purpose of the model
+
 
 
 # Part 2c, Center and Scale -------------------------------------------------------------------
