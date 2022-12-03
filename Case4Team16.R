@@ -1,6 +1,6 @@
 # Team 16 -----------------------------------------------------------------------------------------
- # Ben    S
- # Smita  D
+ # Ben S
+ # Smita D
  # Jiacan L
  # Andrew L
  # Jeffri B
@@ -10,13 +10,12 @@
 # Part 0, Setup -----------------------------------------------------------------------------------
 rm(list=ls()); options(scipen=999)
 if (!require("tidyverse")) {install.packages("tidyverse"); library(tidyverse)}
-if (!require("caret"))     {install.packages("caret");     library(caret)}
-if (!require("MASS"))      {install.packages("MASS");      library(caret)}
+if (!require("caret")) {install.packages("caret"); library(tidyverse)}
 p <- function(x) {par(mfrow = c(x[1], x[2]))}
 
 # Import Data
 churnData <- read.csv("Case4.csv", stringsAsFactors = T)
-churnData$Surname   <- NULL
+churnData$Surname <- NULL
 churnData$RowNumber <- NULL
     #These are is not predictive.
 
@@ -45,8 +44,6 @@ summary(churnData)
 
 
 # Part 1, Small Logistic --------------------------------------------------------------------------------
-
-# Model Training
 shortlogmodel <- glm(Exited ~ Age + Gender, family = binomial, data = churnData)
 summary(shortlogmodel)
     #All variables are significant.
@@ -75,9 +72,12 @@ cooks.distance(shortlogmodel) |> sort(decreasing = T) |> head(4)
         #We can compare our coefficients with and without these points.
 
 coefs_base <- coef(shortlogmodel)
+
 outliers <- cooks.distance(shortlogmodel) |> sort(decreasing = T) |> head(4) |> names() |> as.numeric()
 subset <- churnData[-outliers,]
+
 coefs_new <- coef(glm(Exited ~ Age + Gender, family = binomial, data = subset))
+
 rbind(coefs_base, coefs_new)
     #The effect is noticeable, but not extreme.
     #We believe there are no strongly influential outliers.
@@ -88,47 +88,9 @@ plot(shortlogmodel, which = 1)
     #We see a slight negative relationship.
     #We believe errors are not fully independent.
 
-# Interpretation
-summary(shortlogmodel)
-    #The effects of Age and Gender on the logged odds of churning are:
-        #Each year of age       = +0.0631
-        #Being male             = -0.5370
-        #Intercept purposefully absent. Read on.
-    #These variables do not capture the effect of having a non-modal gender.
-    #The leftmost point that is reasonably considerable is not the intercept, but Age = 18.
-        #At 18, female employees have a 7.40% probability of churning.
-        #At 18, male employees have a 4.46% probability of churning.
-        #Both rates only go up with age.
 
 
-probs <- predict(shortlogmodel, test, type="response")
-head(probs)
-pred <- ifelse(probs>.5, 1,0)|> as.factor()
-head(pred)
-
-mean(pred!=test$Exited)
-mean(pred==test$Exited)
-
-class(pred);class(test$Exited)
-confusionMatrix(data = pred, reference = test$Exited, positive="1")
-
-     #Sensitivity = 0.04914
-          #This is the true positive rate and it is very low
-     #Specificity = 0.96545
-          #This is the true negative rate and it is very high, ...
-          #so our model is very good at predicting who will stay.
-          #This, however, is not the event of interest. Having a high sensitivity is           more important and useful, ...
-          #but it is interesting that our model is good at predicting who will stay.
-          #There are 20 True Positives, 1537 True Negatives, 387 False Negatives,             and 55 False Positives
-     #Overall, the model is not good at predicting who will churn, ...
-          #but it is very good at predicting who will stay.
-          #While this may be useful, it was not the purpose of the model
-          # The accuracy is .7789
-     #This shortlog model is much worse than the biglogistic model created next.
-
-
-
-# Part 2a, Data Split ----------------------------------------------------------------------------------
+# Part 2a, Data Split --------------------------------------------------------------------------------
 set.seed(1325029) #hexatridecimal "seed" converted to decimal
 divideData <- caret::createDataPartition(churnData$Exited, p=.8, list=FALSE)
 train <- churnData[ divideData,]
@@ -137,99 +99,11 @@ test  <- churnData[-divideData,]
 
 
 # Part 2b, Big Logistic --------------------------------------------------------------------------------
-
-# Model Selection
-logisticmodel <- glm(Exited ~ ., family = binomial, data = train)
-summary(logisticmodel)
-
-logisticmodel1 <- glm(Exited ~ CreditScore + Geography + Gender + Age + Tenure + Balance + NumOfProducts + HasCrCard + IsActiveMember + EstimatedSalary + Tenure_FACTOR, family = binomial, data = train)
-summary(logisticmodel1)
-
-logisticmodel2 <- glm(Exited ~ CreditScore + Geography + Gender + Age + Tenure + NumOfProducts + HasCrCard + IsActiveMember + EstimatedSalary + Tenure_FACTOR, family = binomial, data = train)
-summary(logisticmodel2)
-
-logisticmodel3 <- glm(Exited ~ CreditScore + Geography + Gender + Age + Tenure + NumOfProducts + HasCrCard + IsActiveMember + Tenure_FACTOR, family = binomial, data = train)
-summary(logisticmodel3)
-
-logisticmodel4 <- glm(Exited ~  Geography + Gender + Age + Tenure + NumOfProducts + HasCrCard + IsActiveMember + Tenure_FACTOR, family = binomial, data = train)
-summary(logisticmodel4)
-
-logisticmodel5 <- glm(Exited ~  Geography + Gender + Age + NumOfProducts + HasCrCard + IsActiveMember + Tenure_FACTOR, family = binomial, data = train)
-summary(logisticmodel5)
-
-logisticmodel6 <- glm(Exited ~  Geography + Gender + Age + NumOfProducts + IsActiveMember + Tenure_FACTOR, family = binomial, data = train)
-summary(logisticmodel6)
-
-logisticmodel7<- glm(Exited ~  Geography + Gender + Age + NumOfProducts + IsActiveMember , family = binomial, data = train)
-summary(logisticmodel7)
-
-rm(list = c("logisticmodel1", "logisticmodel2", "logisticmodel3", "logisticmodel4", "logisticmodel5", "logisticmodel6"))
-logisticmodel <- logisticmodel7
-
-summary(logisticmodel)
-    #We decided on this model with these variables because we took out the ones that were not significant.
-    #Some dummy variables in this model are not significant, such as GeographySpain, but since
-    #GeographyGermany is significant, the entire Geography variable must stay.
-    #(Same with NumOfProducts4.)
-
-# Assumption 1: Linear Logit
-logit <- logisticmodel$linear.predictors
-plot(logit, train$Age)
-
-# Assumption 2: No Multicolinearity
-car::vif(logisticmodel)
-    #Nothing even close to 5 or 10.
-    #No multicolinearity.
-
-# Assumption 3: No Influential Outliers
-plot(logisticmodel, which = 4); abline(h = 4/nrow(churnData), col = "red")
-    #There seem to be many points that are far from the median, ...
-    #but we do not see a reason to extract any after seeing the effect previously.
-cooks.distance(logisticmodel) |> sort(decreasing = T) |> head(10)
-    #A large portion of our data is above Cook's D cutoff of 4/N, but no outliers seem extraordinary.
-    #It is more accurate to say that the data has a wide spread, not that it has many outliers.
-    #We should check, just to be sure.
-
-coefs_base <- coef(logisticmodel)
-outliers <- cooks.distance(logisticmodel) |> sort(decreasing = T) |> head(4) |> names() |> as.numeric()
-subset <- train[-outliers,]
-coefs_new <- coef(glm(Exited ~ Geography + Gender + Age + NumOfProducts + IsActiveMember, family = binomial, data = subset))
-rbind(coefs_base, coefs_new)
-    #The effect is very minor.
-    #We believe there are no strongly influential outliers.
-
-# Assumption 4: Independence of Errors
-plot(logisticmodel, which = 1)
-    #We once again have our two clear groups.
-    #We see an odd shape, but no overall directional relationship.
-    #We believe errors are independent.
-
-# Model Metrics
-probs <- predict(logisticmodel, test, type="response")
-head(probs)
-pred <- ifelse(probs>.5, 1,0)|> as.factor()
-head(pred)
-
-mean(pred!=test$Exited)
-mean(pred==test$Exited)
-
-class(pred);class(test$Exited)
-confusionMatrix(data = pred, reference = test$Exited, positive="1")
-    #Sensitivity = 0.34644
-        #This is the true positive rate and it is not very high
-    #Specificity = 0.96294
-        #This is the true negative rate and it is very high, ...
-        #so our model is very good at predicting who will stay.
-        #This, however, is not the event of interest. Having a high sensitivity is more important and useful, ...
-        #but it is interesting that our model is good at predicting who will stay.
-    #There are 141 True Positives, 1533 True Negatives, 266 False Negatives, and 59 False Positives
-    #Overall, the model is not great at predicting who will churn, ...
-    #but it is very good at predicting who will stay.
-    #While this may be useful, it was not the purpose of the model
+#TODO ON BigLogistic BRANCH!
 
 
 
-# Part 2c, Center and Scale -------------------------------------------------------------------
+# Part 2c, Center and Scale --------------------------------------------------------------------------------
 preprocessing <- train |> preProcess(method=c("center","scale"))
 train_trans <- preprocessing |> predict(train)
 test_trans  <- preprocessing |> predict(test)
@@ -237,100 +111,47 @@ test_trans  <- preprocessing |> predict(test)
 
 
 # Part 2d, LDA --------------------------------------------------------------------------------
-
-# Model Training
-ldamodel <- lda(Exited~. - Tenure,data = train_trans)
-    #Performs best with Tenure_FACTOR, not Tenure.
-
-# Predictions & Stats
-predictions <- ldamodel |> predict(test_trans)
-confusionMatrix(data = predictions$class, reference = test_trans$Exited, positive = "1")
-    #True Positives:136
-    #False Positives:51
-    #True Negatives:1537
-    #False Negatives:271
-    #Overall accuracy is 83.89%,
-    #The sensitivity comes from 136/(136+271), equals to 33.42%.
-    #The specificity comes from 1541/(1541+51), equals to 96.80%,
-    #This model is not a very good predictor of true positives.
+#TODO ON LDA BRANCH!
 
 
 
 # Part 2e, QDA --------------------------------------------------------------------------------
-
-# Model Training
+#TODO ON QDA BRANCH!
+#QDA assumes that each class has its own covariance matrix - much more flexible approach - improved accuracy
+library(caret)
+#<<<<<<< Updated upstream
+#=======
+library(MASS)
+#>>>>>>> Stashed changes
 try(qdamodel <- MASS::qda(Exited ~ . - Tenure, data=train_trans))
     #This does not run with NumOfProducts included!
     #There is insufficient data in its levels to separate the y classes.
-qdamodel <- MASS::qda(Exited ~ . - Tenure_FACTOR - NumOfProducts, data=train_trans)
-    #Actually peforms better with Tenure as opposed to Tenure_FACTOR.
+qdamodel <- MASS::qda(Exited ~ . - Tenure - NumOfProducts, data=train_trans)
 
-# Predictions and Statistics
+qdamodel
+#MAKING PREDICTIONS
 predictions<-qdamodel %>% predict(test_trans)
 names(predictions)
-
+#Checking accuracy
 mean(predictions$class==test_trans$Exited)
 table(predictions$class,test_trans$Exited)
-
+#Confusion matrix
 predictions$class <- as.factor(predictions$class)
-caret::confusionMatrix(data = predictions$class, reference = test_trans$Exited, positive = "1")
-    #Accuracy is 82.14%.
-    #Sensitivity is 29.48%, meaning the model does not predict positive cases well.
-    #Specificity is 95.60%. Good but irrelevant, given 80% of the data is the negative case.
-    #True negatives 1522, false negatives 287.
-    #True positives 120, false positives 70
+caret::confusionMatrix(predictions$class, test_trans$Exited, positive = "1")
+#Accuracy is 0.81
+#Overall accuracy of the model is 83%
+#the sentivity analysis rate stands at 28% which means the model will not perform well 
+#the specificity analysis rate stands at 95% 
+#True negatives 1517 # false negatives 291
+#false positives 75 #true positives 116s
 
 
 
 # Part 2f, KNN --------------------------------------------------------------------------------
-
-# Model Training
-knnmodel <- train(Exited ~ . - Tenure_FACTOR, data = train_trans, method="knn")
-    #Performs better with Tenure, rather than Tenure_FACTOR.
-
-# Predicitons and Stats
-preds <- predict(knnmodel, newdata=test_trans)
-confusionMatrix(data = preds, reference = test_trans$Exited, positive = "1")
-    #Sensitivity of 29.48%. This model is not a very good predictor of positive cases.
-    #Specifitiy of 96.42%. This model is very good at predicting positive cases, ...
-    #which isn't particularly helpful.
-    #Accuracy of 82.79%.
-    #True positives of 120, false positives 57.
-    #True negatives of 1535, false negatives of 287.
+#TODO ON KNN BRANCH!
 
 
 
 # Part 2g, Model Selection --------------------------------------------------------------------------------
+#TODO ON MAIN BRANCH!
 
-# Model Statistics
-
-#Model
-	#Sens   #Spec   #Acc
-#ShortLogistic
-     #4.91%    #96.55%   #77.89%
-#Big Logistic
-	#34.74%	#96.29%	#83.74%
-#LDA
-	#33.42%	#96.80%	#83.89%
-#QDA
-	#29.48%	#95.60%	#82.14%
-#KNN
-	#29.48%	#96.42%	#82.79%
-
-#Sorted by Sens, desc.
-    #BigLogistic, LDA, QDA/KNN, ShortLog
-#Sorted by Spec, desc.
-    #LDA, ShortLog, KNN, BigLogistic, QDA
-#Sorted by Acc, desc.
-    #LDA, BigLogistic, KNN, QDA, ShortLog
-
-#This case fundamentally focuses on which employees will churn, our positive cases.
-    #Sensitivity best captures true positive classification rate, so it will be our primary selector.
-    #Ranked by sensitivity, BigLogistic barely beats LDA.
-    #BigLogistic, however, had the advantage of feature selection to reduce noise.
-    #This is difficult to perform efficiently for normal LDA, but is possible via Sparse Discriminant Analysis.
-        #(à la https://hastie.su.domains/Papers/sda_resubm_daniela-final.pdf)
-
-#For this particular case, we believe BigLogistic Regression is the best approach.
-    #BigLogistic and LDA being so closely tied shows that the data is fundamentally linear.
-    #(Both are linear parametric approaches.)
