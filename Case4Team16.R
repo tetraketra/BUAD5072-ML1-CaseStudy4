@@ -116,34 +116,28 @@ test_trans  <- preprocessing |> predict(test)
 
 
 # Part 2e, QDA --------------------------------------------------------------------------------
-#TODO ON QDA BRANCH!
-#QDA assumes that each class has its own covariance matrix - much more flexible approach - improved accuracy
-library(caret)
-#<<<<<<< Updated upstream
-#=======
-library(MASS)
-#>>>>>>> Stashed changes
+
+# Model Training
 try(qdamodel <- MASS::qda(Exited ~ . - Tenure, data=train_trans))
     #This does not run with NumOfProducts included!
     #There is insufficient data in its levels to separate the y classes.
-qdamodel <- MASS::qda(Exited ~ . - Tenure - NumOfProducts, data=train_trans)
+qdamodel <- MASS::qda(Exited ~ . - Tenure_FACTOR - NumOfProducts, data=train_trans)
+    #Actually peforms better with Tenure as opposed to Tenure_FACTOR.
 
-qdamodel
-#MAKING PREDICTIONS
+# Predictions and Statistics
 predictions<-qdamodel %>% predict(test_trans)
 names(predictions)
-#Checking accuracy
+
 mean(predictions$class==test_trans$Exited)
 table(predictions$class,test_trans$Exited)
-#Confusion matrix
+
 predictions$class <- as.factor(predictions$class)
-caret::confusionMatrix(predictions$class, test_trans$Exited, positive = "1")
-#Accuracy is 0.81
-#Overall accuracy of the model is 83%
-#the sentivity analysis rate stands at 28% which means the model will not perform well 
-#the specificity analysis rate stands at 95% 
-#True negatives 1517 # false negatives 291
-#false positives 75 #true positives 116
+caret::confusionMatrix(data = predictions$class, reference = test_trans$Exited, positive = "1")
+    #Accuracy is 82.14%.
+    #Sensitivity is 29.48%, meaning the model does not predict positive cases well.
+    #Specificity is 95.60%. Good but irrelevant, given 80% of the data is the negative case.
+    #True negatives 1522, false negatives 287.
+    #True positives 120, false positives 70
 
 
 
