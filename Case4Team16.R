@@ -229,7 +229,6 @@ confusionMatrix(data = predictions$class, reference = test_trans$Exited, positiv
 
 
 
-
 # Part 2e, QDA --------------------------------------------------------------------------------
 #TODO ON QDA BRANCH!
 
