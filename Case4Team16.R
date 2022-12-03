@@ -275,5 +275,34 @@ confusionMatrix(data = preds, reference = test_trans$Exited, positive = "1")
 
 
 # Part 2g, Model Selection --------------------------------------------------------------------------------
-#TODO ON MAIN BRANCH!
 
+# Model Statistics
+
+#Model
+	#Sens   #Spec   #Acc
+#Logistic
+	#34.74%	#96.29%	#83.74%
+#LDA
+	#33.42%	#96.80%	#83.89%
+#QDA
+	#29.48%	#95.60%	#82.14%
+#KNN
+	#29.48%	#96.42%	#82.79%
+
+#Sorted by Sens, desc.
+    #Logistic, LDA, QDA/KNN
+#Sorted by Spec, desc.
+    #LDA, KNN, Logistic, QDA
+#Sorted by Acc, desc.
+    #LDA, Logistic, KNN, QDA
+
+#This case fundamentally focuses on which employees will churn, our positive cases.
+    #Sensitivity best captures true positive classification rate, so it will be our primary selector.
+    #Ranked by sensitivity, Logistic barely beats LDA.
+    #Logistic, however, had the advantage of feature selection to reduce noise.
+    #This is difficult to perform efficiently for normal LDA, but is possible via Sparse Discriminant Analysis.
+        #(à la https://hastie.su.domains/Papers/sda_resubm_daniela-final.pdf)
+
+#For this particular case, we believe Logistic Regression is the best approach.
+    #Logistic and LDA being so closely tied shows that the data is fundamentally linear.
+    #(Both are linear parametric approaches.)
